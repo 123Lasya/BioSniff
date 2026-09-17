@@ -49,6 +49,20 @@ def ingest_sensor_data(
     return service.ingest_sensor_data(payload)
 
 
+@router.api_route("/sensor-data/check-overdue", methods=["GET", "POST"], summary="Run hourly missing node check")
+@router.api_route("/nodes/check-overdue", methods=["GET", "POST"], summary="Run hourly missing node check")
+def check_overdue_nodes_sensor(
+    farm_id: Optional[int] = Query(None, description="Optional farm_id to check"),
+    db: Session = Depends(get_db)
+):
+    """
+    Executes database-driven hourly missing node monitoring.
+    Creates NODE_NO_DATA alerts for any nodes overdue for sensor ingestion.
+    """
+    service = SensorDataService(db)
+    return service.check_overdue_nodes(farm_id_input=farm_id)
+
+
 @router.get(
     "/nodes/{node_id}/sensor-history",
     response_model=NodeSensorHistoryResponse,

@@ -27,6 +27,20 @@ def create_node(
     return service.create_node(node_in, current_user=current_user)
 
 
+@router.api_route("/check-overdue", methods=["GET", "POST"], summary="Run hourly missing node check")
+def check_overdue_nodes(
+    farm_id: Optional[int] = Query(None, description="Optional farm_id to check"),
+    db: Session = Depends(get_db)
+):
+    """
+    Executes database-driven hourly missing node monitoring.
+    Creates NODE_NO_DATA alerts for any nodes overdue for sensor ingestion.
+    """
+    from app.services.sensor_service import SensorDataService
+    sensor_service = SensorDataService(db)
+    return sensor_service.check_overdue_nodes(farm_id_input=farm_id)
+
+
 @router.get("/{node_id}", response_model=NodeOut, summary="Get node telemetry and configuration")
 def get_node(
     node_id: str,

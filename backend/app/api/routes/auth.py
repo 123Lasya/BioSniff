@@ -101,7 +101,8 @@ async def upload_avatar(
             detail="Invalid file format. Only JPEG, PNG, WEBP, and GIF images are allowed."
         )
 
-    upload_dir = os.path.join("backend", "uploads", "avatars")
+    backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    upload_dir = os.path.join(backend_dir, "uploads", "avatars")
     os.makedirs(upload_dir, exist_ok=True)
 
     file_ext = os.path.splitext(file.filename or "")[1] or ".jpg"

@@ -15,7 +15,8 @@ async def lifespan(app: FastAPI):
     Notice: We do NOT silently auto-create uncontrolled tables on startup,
     as required; schema migrations are strictly managed via Alembic.
     """
-    os.makedirs(os.path.join("backend", "uploads", "avatars"), exist_ok=True)
+    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.makedirs(os.path.join(backend_dir, "uploads", "avatars"), exist_ok=True)
     print(f"[{settings.PROJECT_NAME}] Starting up backend in {settings.ENVIRONMENT} mode...")
     print(f"[{settings.PROJECT_NAME}] Database target: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL}")
     print(f"[{settings.PROJECT_NAME}] CORS origins enabled: {settings.cors_origins_list}")
@@ -47,7 +48,8 @@ app.add_middleware(
 )
 
 # Mount uploaded media directory
-uploads_dir = os.path.join("backend", "uploads")
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+uploads_dir = os.path.join(backend_dir, "uploads")
 os.makedirs(uploads_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 

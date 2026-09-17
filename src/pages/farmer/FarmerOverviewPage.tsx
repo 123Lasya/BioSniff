@@ -95,16 +95,16 @@ export const FarmerOverviewPage: React.FC = () => {
     (dashboardData.detected_diseases && dashboardData.detected_diseases.length > 0) ||
     dashboardData.latest_prediction?.disease_detected === true;
 
-  const farmName = dashboardData.farm?.farm_name || 'Patil Organic Paddy Farm';
-  const farmerName = dashboardData.farmer?.full_name || 'Ramesh Patil';
-  const cropVariety = dashboardData.crop_variety || dashboardData.crop || 'Basmati 1121';
-  const areaAcres = dashboardData.farm?.area || 4.6;
-  const lastUpdate = dashboardData.last_update || 'Just now';
+  const farmName = dashboardData.farm?.farm_name || dashboardData.farm?.name || 'Bio-Sniff Farm';
+  const farmerName = dashboardData.farmer?.full_name || 'Farmer';
+  const cropVariety = dashboardData.crop_variety || dashboardData.crop || 'Paddy / Crop';
+  const areaAcres = dashboardData.farm?.area || dashboardData.farm?.area_acres || 0;
+  const lastUpdate = dashboardData.last_update || 'No cycles recorded yet';
 
   // Format farm coordinates & boundary
   const farmCenter: FarmCoordinate = {
-    lat: dashboardData.farm_coordinates?.lat || 19.3919,
-    lng: dashboardData.farm_coordinates?.lng || 74.6528,
+    lat: dashboardData.farm_coordinates?.lat || dashboardData.farm?.coordinates?.lat || 19.8321,
+    lng: dashboardData.farm_coordinates?.lng || dashboardData.farm?.coordinates?.lng || 74.6521,
   };
 
   const farmBoundary: FarmCoordinate[] = (dashboardData.farm_boundary || []).map((b) => ({
@@ -114,47 +114,52 @@ export const FarmerOverviewPage: React.FC = () => {
 
   // Format nodes for FarmMap
   const mappedNodes: SensorNode[] = (dashboardData.latest_node_states || []).map((n: any) => ({
-    id: n.node_id || n.id || 'NODE_01',
-    nodeId: n.node_id || 'NODE_01',
-    name: n.node_name || n.name || 'Node 1',
+    id: n.node_id || n.id,
+    nodeId: n.node_id || n.id,
+    name: n.node_name || n.name || n.node_id,
     status: n.status === 'online' ? 'online' : 'offline',
-    battery: n.battery_percentage ?? n.battery ?? 90,
+    battery: n.battery_percentage ?? n.battery ?? 100,
     signal: n.signal_strength && n.signal_strength > -75 ? 'Excellent' : 'Good',
-    signalDbm: n.signal_strength ?? -72,
+    signalDbm: n.signal_strength ?? -75,
     coordinates: {
-      lat: n.latitude ?? 19.3925,
-      lng: n.longitude ?? 74.6532,
+      lat: n.latitude ?? n.coordinates?.lat ?? farmCenter.lat,
+      lng: n.longitude ?? n.coordinates?.lng ?? farmCenter.lng,
     },
-    lastTransmission: n.last_seen ? new Date(n.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
+    lastTransmission: n.last_seen ? new Date(n.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No transmission yet',
     firmwareVersion: n.firmware_version || 'v2.3.1',
     deploymentDate: 'Active',
     hardware: n.is_master ? 'Master ESP32 + BME688' : 'Node ESP32 + BME688',
     powerSource: 'Solar (with Battery)',
     readings: {
-      temperature: n.temperature ?? dashboardData.temperature ?? 28,
-      humidity: n.humidity ?? dashboardData.humidity ?? 72,
-      pressure: n.pressure ?? dashboardData.pressure ?? 1008,
-      totalVoc: n.avg_gas_resistance ?? 145.2,
-      gasResistance10: n.gas_readings || [145, 138, 124, 112, 98, 88, 76, 65, 52, 41],
+      temperature: n.readings?.temperature ?? n.temperature ?? 0,
+      humidity: n.readings?.humidity ?? n.humidity ?? 0,
+      pressure: n.readings?.pressure ?? n.pressure ?? 0,
+      totalVoc: n.readings?.total_voc ?? n.avg_gas_resistance ?? 0,
+      gasResistance10: n.readings?.gas_resistance_10 || n.gas_readings || [],
     },
   }));
 
   // Disease source formatting
-  const diseaseSource = isDiseaseDetected
+  const locLat = dashboardData.localized_source?.lat || dashboardData.localization?.estimated_latitude;
+  const locLng = dashboardData.localized_source?.lng || dashboardData.localization?.estimated_longitude;
+
+  const diseaseSource = (isDiseaseDetected && locLat && locLng)
     ? {
         coordinates: {
-          lat: dashboardData.localized_source?.lat || dashboardData.localization?.estimated_latitude || 19.3923,
-          lng: dashboardData.localized_source?.lng || dashboardData.localization?.estimated_longitude || 74.6534,
+          lat: locLat,
+          lng: locLng,
         },
-        name: dashboardData.detected_diseases?.[0] || dashboardData.latest_prediction?.predicted_class || 'Rice_Blast',
-        confidence: Math.round((dashboardData.latest_prediction?.confidence || dashboardData.confidence || 0.94) * (dashboardData.latest_prediction?.confidence <= 1 ? 100 : 1)),
+        name: dashboardData.detected_diseases?.[0] || dashboardData.latest_prediction?.predicted_class || 'Pathogen Anomaly',
+        confidence: Math.round((dashboardData.latest_prediction?.confidence || dashboardData.confidence || 0.9) * (dashboardData.latest_prediction?.confidence <= 1 ? 100 : 1)),
       }
     : null;
 
-  const diseaseName = dashboardData.detected_diseases?.[0] || dashboardData.latest_prediction?.predicted_class || 'Rice_Blast';
-  const confidenceScore = diseaseSource ? diseaseSource.confidence : Math.round((dashboardData.confidence || 0.92) * (dashboardData.confidence <= 1 ? 100 : 1));
-  const affectedZone = dashboardData.affected_zone?.name || 'North-East Sector (Plot 2A)';
-  const recommendedAction = dashboardData.recommended_action_summary || dashboardData.latest_recommendation?.details || 'Apply Tricyclazole 75% WP @ 0.6 g/L water across the affected quadrant within 24 hours.';
+  const diseaseName = dashboardData.detected_diseases?.[0] || dashboardData.latest_prediction?.predicted_class || 'Pathogen Anomaly';
+  const confidenceScore = diseaseSource
+    ? diseaseSource.confidence
+    : (dashboardData.latest_prediction?.confidence ? Math.round(dashboardData.latest_prediction.confidence * (dashboardData.latest_prediction.confidence <= 1 ? 100 : 1)) : 0);
+  const affectedZone = dashboardData.affected_zone?.name || dashboardData.localization?.affected_zone?.name || 'Estimated micro-zone';
+  const recommendedAction = dashboardData.recommended_action_summary || dashboardData.latest_recommendation?.details || 'Maintain routine field scouting and monitor hourly node cycles.';
 
   return (
     <div className="min-h-screen bg-[#F6F9F6] text-[#1A281E] flex flex-col font-sans">

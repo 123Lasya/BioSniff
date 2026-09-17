@@ -128,36 +128,26 @@ class EnvironmentService:
                 node_averages=node_averages
             )
 
-        # 3. Default standard baseline
-        latest_reading = {
-            "temperature": 28.0,
-            "humidity": 72.0,
-            "pressure": 1008.0,
-            "wind_speed": 2.4,
-            "wind_direction": "NE (48°)",
-            "soil_moisture": 70.0,
-            "solar_radiation": 500.0,
-            "recorded_at": datetime.now(timezone.utc).isoformat()
-        }
+        # 3. No environmental reading or sensor cycle present
         node_averages = {
-            "reporting_nodes": nodes_count,
-            "temperature": 28.0,
-            "humidity": 72.0,
-            "pressure": 1008.0
+            "reporting_nodes": 0,
+            "temperature": None,
+            "humidity": None,
+            "pressure": None
         }
         return EnvironmentCurrentResponse(
             farm_id=farm_id,
-            temperature=28.0,
-            humidity=72.0,
-            pressure=1008.0,
-            wind_speed=2.4,
-            wind_direction="NE (48°)",
-            wind_angle=48.0,
-            soil_moisture=70.0,
-            solar_radiation=500.0,
-            weather_condition="Clear",
+            temperature=None,
+            humidity=None,
+            pressure=None,
+            wind_speed=None,
+            wind_direction="N/A",
+            wind_angle=0.0,
+            soil_moisture=None,
+            solar_radiation=None,
+            weather_condition="No Data",
             recorded_at=datetime.now(timezone.utc),
-            latest_reading=latest_reading,
+            latest_reading=None,
             node_averages=node_averages
         )
 

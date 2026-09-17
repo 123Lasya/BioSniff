@@ -52,18 +52,17 @@ class NodeService:
             .limit(5)
             .all()
         )
-        gas10 = latest_cycle.gas_readings if latest_cycle and latest_cycle.gas_readings else [
-            145.2, 138.4, 124.6, 112.8, 98.4, 88.5, 76.2, 65.4, 52.1, 41.8
-        ]
-        temp = latest_cycle.temperature if latest_cycle else 28.4
-        hum = latest_cycle.humidity if latest_cycle else 72.0
-        press = latest_cycle.pressure if latest_cycle else 1008.0
+        gas10 = latest_cycle.gas_readings if latest_cycle and latest_cycle.gas_readings else None
+        temp = latest_cycle.temperature if latest_cycle else None
+        hum = latest_cycle.humidity if latest_cycle else None
+        press = latest_cycle.pressure if latest_cycle else None
 
         transmission_logs = []
         for c in recent_cycles:
+            avg_gas = round(sum(c.gas_readings[:3]) / 3.0, 1) if c.gas_readings else None
             transmission_logs.append({
                 "time": c.cycle_timestamp.strftime("%I:%M:%S %p"),
-                "voc": f"{round(sum(c.gas_readings[:3]) / 3.0, 1)} kΩ" if c.gas_readings else "124.6 kΩ",
+                "voc": f"{avg_gas} kΩ" if avg_gas is not None else "N/A",
                 "temp": f"{c.temperature:.1f} °C",
                 "humidity": f"{int(c.humidity)}%",
                 "status": "Success (5G)"
@@ -85,22 +84,22 @@ class NodeService:
             last_seen=node.last_seen,
             created_at=node.created_at,
             updated_at=node.updated_at,
-            battery=round(node.battery_percentage, 1),
+            battery=round(node.battery_percentage, 1) if node.battery_percentage is not None else 90.0,
             signal=sig_desc,
             signal_dbm=node.signal_strength,
             coordinates={"lat": node.latitude, "lng": node.longitude},
             hardware="ESP32 + BME688",
             power_source="Solar (with Battery)",
-            device_temp=24.0,
-            battery_voltage=5.1 if node.battery_percentage > 50 else 4.2,
-            uptime="98% (7 days)",
+            device_temp=None,
+            battery_voltage=5.1 if (node.battery_percentage is not None and node.battery_percentage > 50) else 4.2,
+            uptime="100%",
             readings={
-                "temperature": round(temp, 1),
-                "humidity": round(hum, 1),
-                "pressure": round(press, 1),
-                "total_voc": round(sum(gas10[:3]) / 3.0, 1),
+                "temperature": round(temp, 1) if temp is not None else None,
+                "humidity": round(hum, 1) if hum is not None else None,
+                "pressure": round(press, 1) if press is not None else None,
+                "total_voc": round(sum(gas10[:3]) / 3.0, 1) if (gas10 and len(gas10) >= 3) else None,
                 "gas_resistance_10": gas10,
-                "iaq": "Good"
+                "iaq": "Good" if gas10 else "No Data"
             },
             transmission_logs=transmission_logs
         )
@@ -267,7 +266,7 @@ class NodeService:
                 window_end=p.window_end,
                 predicted_class=p.predicted_class,
                 disease_detected=p.disease_detected,
-                confidence=round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1),
+                confidence=round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1) if p.confidence is not None else 0.0,
                 anomaly_score=p.anomaly_score,
                 all_class_probabilities=p.all_class_probabilities or p.raw_probabilities,
                 model_version=p.model_version
@@ -308,7 +307,7 @@ class NodeService:
                 window_end=p.window_end,
                 predicted_class=p.predicted_class,
                 disease_detected=p.disease_detected,
-                confidence=round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1),
+                confidence=round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1) if p.confidence is not None else 0.0,
                 anomaly_score=p.anomaly_score,
                 all_class_probabilities=p.all_class_probabilities or p.raw_probabilities,
                 model_version=p.model_version

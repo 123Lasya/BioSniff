@@ -98,37 +98,37 @@ class FarmerDashboardService:
                 .first()
             )
 
-            gas10 = latest_cycle.gas_readings if latest_cycle and latest_cycle.gas_readings else [
-                145.2, 138.4, 124.6, 112.8, 98.4, 88.5, 76.2, 65.4, 52.1, 41.8
-            ]
-            temp = latest_cycle.temperature if latest_cycle else 28.4
-            hum = latest_cycle.humidity if latest_cycle else 72.0
-            press = latest_cycle.pressure if latest_cycle else 1008.0
+            gas10 = latest_cycle.gas_readings if latest_cycle and latest_cycle.gas_readings else None
+            temp = latest_cycle.temperature if latest_cycle else None
+            hum = latest_cycle.humidity if latest_cycle else None
+            press = latest_cycle.pressure if latest_cycle else None
 
             node_dict = {
                 "id": n.node_id,
                 "node_id": n.node_id,
                 "name": n.node_name,
                 "status": n.status,
-                "battery": round(n.battery_percentage, 1),
-                "signal": "Excellent" if n.signal_strength > -70 else "Good" if n.signal_strength > -85 else "Fair",
+                "battery": round(n.battery_percentage, 1) if n.battery_percentage is not None else 90.0,
+                "signal": "Excellent" if (n.signal_strength is not None and n.signal_strength > -70) else "Good" if (n.signal_strength is not None and n.signal_strength > -85) else "Fair",
                 "signal_dbm": n.signal_strength,
                 "coordinates": {"lat": n.latitude, "lng": n.longitude},
                 "last_seen": n.last_seen.strftime("%d %b %Y, %I:%M %p") if n.last_seen else None,
                 "firmware_version": n.firmware_version,
                 "is_master": n.is_master,
                 "readings": {
-                    "temperature": round(temp, 1),
-                    "humidity": round(hum, 1),
-                    "pressure": round(press, 1),
-                    "total_voc": round(sum(gas10[:3]) / 3.0, 1),
+                    "temperature": round(temp, 1) if temp is not None else None,
+                    "humidity": round(hum, 1) if hum is not None else None,
+                    "pressure": round(press, 1) if press is not None else None,
+                    "total_voc": round(sum(gas10[:3]) / 3.0, 1) if (gas10 and len(gas10) >= 3) else None,
                     "gas_resistance_10": gas10,
-                    "iaq": "Good"
+                    "iaq": "Good" if gas10 else "Waiting for cycle"
                 }
             }
             latest_node_states.append(node_dict)
-            total_battery += n.battery_percentage
-            total_signal += n.signal_strength
+            if n.battery_percentage is not None:
+                total_battery += n.battery_percentage
+            if n.signal_strength is not None:
+                total_signal += n.signal_strength
             battery_count += 1
 
         avg_battery = round(total_battery / max(battery_count, 1), 1) if battery_count > 0 else 90.0
@@ -160,7 +160,7 @@ class FarmerDashboardService:
                 "node_id": p.node_id,
                 "predicted_class": p.predicted_class,
                 "disease_detected": p.disease_detected,
-                "confidence": round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1),
+                "confidence": round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1) if p.confidence is not None else 0.0,
                 "timestamp": p.timestamp.strftime("%d %b %Y, %I:%M %p") if p.timestamp else None,
                 "all_class_probabilities": p.all_class_probabilities or p.raw_probabilities,
             }
@@ -219,11 +219,11 @@ class FarmerDashboardService:
             .first()
         )
 
-        temp = env_reading.ambient_temp if env_reading else (latest_node_states[0]["readings"]["temperature"] if latest_node_states else 28.0)
-        hum = env_reading.humidity if env_reading else (latest_node_states[0]["readings"]["humidity"] if latest_node_states else 72.0)
-        press = env_reading.pressure if env_reading and env_reading.pressure else (latest_node_states[0]["readings"]["pressure"] if latest_node_states else 1008.0)
-        wind_speed = env_reading.wind_speed if env_reading else 2.4
-        wind_dir = env_reading.wind_direction if env_reading and env_reading.wind_direction else "NE (48°)"
+        temp = env_reading.ambient_temp if env_reading else (latest_node_states[0]["readings"]["temperature"] if (latest_node_states and latest_node_states[0]["readings"]["temperature"] is not None) else None)
+        hum = env_reading.humidity if env_reading else (latest_node_states[0]["readings"]["humidity"] if (latest_node_states and latest_node_states[0]["readings"]["humidity"] is not None) else None)
+        press = env_reading.pressure if (env_reading and env_reading.pressure) else (latest_node_states[0]["readings"]["pressure"] if (latest_node_states and latest_node_states[0]["readings"]["pressure"] is not None) else None)
+        wind_speed = env_reading.wind_speed if env_reading else None
+        wind_dir = env_reading.wind_direction if (env_reading and env_reading.wind_direction) else None
 
         # 7. Recommendations
         latest_rec = (
@@ -297,13 +297,13 @@ class FarmerDashboardService:
         }
 
         weather_summary = {
-            "temperature": round(temp, 1),
-            "humidity": round(hum, 1),
-            "pressure": round(press, 1),
+            "temperature": round(temp, 1) if temp is not None else None,
+            "humidity": round(hum, 1) if hum is not None else None,
+            "pressure": round(press, 1) if press is not None else None,
             "wind_speed": wind_speed,
             "wind_direction": wind_dir,
-            "weather_condition": "Partly cloudy",
-            "soil_moisture": 68.0
+            "weather_condition": "Nominal" if temp is not None else "No Reading",
+            "soil_moisture": None
         }
 
         alerts_summary = {
@@ -329,7 +329,7 @@ class FarmerDashboardService:
         for p in reversed(predictions[:12]):
             prediction_trend_24h.append({
                 "time": p.timestamp.strftime("%I:%M %p") if p.timestamp else "",
-                "confidence": round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1),
+                "confidence": round(p.confidence * (100.0 if p.confidence <= 1.0 else 1.0), 1) if p.confidence is not None else 0.0,
                 "condition": p.predicted_class,
                 "disease_detected": p.disease_detected
             })
@@ -361,12 +361,12 @@ class FarmerDashboardService:
             localization=loc_dict,
             affected_zone=affected_zone_dict,
             localized_source=loc_dict,
-            wind={"speed": wind_speed, "direction": wind_dir, "angle": 48.0},
-            wind_speed=wind_speed,
-            wind_direction=wind_dir,
-            temperature=round(temp, 1),
-            humidity=round(hum, 1),
-            pressure=round(press, 1),
+            wind={"speed": wind_speed if wind_speed is not None else 8.5, "direction": wind_dir if wind_dir is not None else "NE (48°)", "angle": 48.0},
+            wind_speed=wind_speed if wind_speed is not None else 8.5,
+            wind_direction=wind_dir if wind_dir is not None else "NE (48°)",
+            temperature=round(temp, 1) if temp is not None else 28.5,
+            humidity=round(hum, 1) if hum is not None else 65.0,
+            pressure=round(press, 1) if press is not None else 1013.2,
             soil_moisture=68.0,
             weather_summary=weather_summary,
             alerts_summary=alerts_summary,
@@ -399,29 +399,29 @@ class FarmerDashboardService:
             gas10 = latest_cycle.gas_readings if latest_cycle and latest_cycle.gas_readings else [
                 145.2, 138.4, 124.6, 112.8, 98.4, 88.5, 76.2, 65.4, 52.1, 41.8
             ]
-            temp = latest_cycle.temperature if latest_cycle else 28.4
-            hum = latest_cycle.humidity if latest_cycle else 72.0
-            press = latest_cycle.pressure if latest_cycle else 1008.0
+            temp = latest_cycle.temperature if (latest_cycle and latest_cycle.temperature is not None) else 28.4
+            hum = latest_cycle.humidity if (latest_cycle and latest_cycle.humidity is not None) else 72.0
+            press = latest_cycle.pressure if (latest_cycle and latest_cycle.pressure is not None) else 1008.0
 
             nodes_summary[key] = {
                 "node_id": n.node_id,
                 "name": n.node_name,
                 "status": n.status,
-                "battery": round(n.battery_percentage, 1),
-                "signal": "Excellent" if n.signal_strength > -70 else "Good" if n.signal_strength > -85 else "Fair",
-                "signal_dbm": n.signal_strength,
+                "battery": round(n.battery_percentage, 1) if n.battery_percentage is not None else 90.0,
+                "signal": "Excellent" if (n.signal_strength is not None and n.signal_strength > -70) else "Good" if (n.signal_strength is not None and n.signal_strength > -85) else "Fair",
+                "signal_dbm": n.signal_strength or -75,
                 "firmware": n.firmware_version,
                 "is_master": n.is_master,
                 "coordinates": {"lat": n.latitude, "lng": n.longitude},
                 "last_seen": n.last_seen.strftime("%d %b %Y, %I:%M %p") if n.last_seen else None,
                 "sensor_state": "normal" if n.status == "online" else "offline",
                 "device_temp": 24,
-                "battery_voltage": 5.1,
+                "battery_voltage": 5.1 if (n.battery_percentage is not None and n.battery_percentage > 50) else 4.2,
                 "readings": {
-                    "temperature": round(temp, 1),
-                    "humidity": round(hum, 1),
-                    "pressure": round(press, 1),
-                    "total_voc": round(sum(gas10[:3]) / 3.0, 1),
+                    "temperature": round(temp, 1) if temp is not None else 28.4,
+                    "humidity": round(hum, 1) if hum is not None else 72.0,
+                    "pressure": round(press, 1) if press is not None else 1008.0,
+                    "total_voc": round(sum(gas10[:3]) / 3.0, 1) if (gas10 and len(gas10) >= 3) else 100.0,
                     "gas_resistance_10": gas10,
                 }
             }
@@ -458,10 +458,10 @@ class FarmerDashboardService:
             "angle": 48.0
         }
         environment_summary = {
-            "temperature": round(env.ambient_temp, 1) if env else 28.0,
-            "humidity": round(env.humidity, 1) if env else 72.0,
-            "pressure": round(env.pressure, 1) if env and env.pressure else 1008.0,
-            "soil_moisture": round(env.soil_moisture, 1) if env and env.soil_moisture else 72.0
+            "temperature": round(env.ambient_temp, 1) if (env and env.ambient_temp is not None) else 28.0,
+            "humidity": round(env.humidity, 1) if (env and env.humidity is not None) else 72.0,
+            "pressure": round(env.pressure, 1) if (env and env.pressure is not None) else 1008.0,
+            "soil_moisture": round(env.soil_moisture, 1) if (env and env.soil_moisture is not None) else 72.0
         }
 
         # Farm Health Summary

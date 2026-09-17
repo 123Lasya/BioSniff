@@ -53,21 +53,13 @@ export const InspectBioSniffPage: React.FC = () => {
           const dt = new Date(r.recorded_at);
           return {
             time: dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            temperature: r.ambient_temp || r.temperature || 28,
-            humidity: r.humidity || 72,
+            temperature: r.ambient_temp || r.temperature || 0,
+            humidity: r.humidity || 0,
           };
         });
         setEnvHistory(points);
       } else {
-        // Fallback chart points if history is initializing
-        setEnvHistory([
-          { time: '12 AM', temperature: 24.2, humidity: 82 },
-          { time: '04 AM', temperature: 22.8, humidity: 88 },
-          { time: '08 AM', temperature: 25.4, humidity: 76 },
-          { time: '12 PM', temperature: 29.5, humidity: 62 },
-          { time: '04 PM', temperature: 29.2, humidity: 64 },
-          { time: '08 PM', temperature: 26.1, humidity: 74 },
-        ]);
+        setEnvHistory([]);
       }
     } catch (err: any) {
       console.error('Failed to load system telemetry:', err);
@@ -111,7 +103,13 @@ export const InspectBioSniffPage: React.FC = () => {
   }
 
   const nodesList = dashboard.latest_node_states || [];
-  const avgResistance = dashboard.battery ? 124.6 : 124.6; // kΩ resistance
+  const validResistances = nodesList
+    .map((n: any) => n.readings?.total_voc)
+    .filter((v: any) => typeof v === 'number' && v > 0);
+  
+  const avgResistance = validResistances.length > 0
+    ? (validResistances.reduce((a: number, b: number) => a + b, 0) / validResistances.length).toFixed(1)
+    : 'N/A';
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">

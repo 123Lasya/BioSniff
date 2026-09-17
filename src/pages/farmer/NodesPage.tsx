@@ -182,17 +182,23 @@ export const NodesPage: React.FC = () => {
               <div className="grid grid-cols-3 gap-2 pt-2 text-center text-xs">
                 <div className="p-2 bg-emerald-50/70 rounded-xl border border-emerald-100">
                   <span className="text-[10px] text-gray-500 block">Gas Resist</span>
-                  <strong className="text-emerald-800 text-sm font-bold">145.2</strong>
+                  <strong className="text-emerald-800 text-sm font-bold">
+                    {node.readings?.total_voc != null ? node.readings.total_voc : 'N/A'}
+                  </strong>
                   <span className="text-[9px] text-gray-400 block">kΩ</span>
                 </div>
                 <div className="p-2 bg-amber-50/70 rounded-xl border border-amber-100">
                   <span className="text-[10px] text-gray-500 block">Temp</span>
-                  <strong className="text-gray-900 text-sm font-bold">28.4°</strong>
+                  <strong className="text-gray-900 text-sm font-bold">
+                    {node.readings?.temperature != null ? `${node.readings.temperature}°` : 'N/A'}
+                  </strong>
                   <span className="text-[9px] text-gray-400 block">Celsius</span>
                 </div>
                 <div className="p-2 bg-blue-50/70 rounded-xl border border-blue-100">
                   <span className="text-[10px] text-gray-500 block">Humidity</span>
-                  <strong className="text-gray-900 text-sm font-bold">72%</strong>
+                  <strong className="text-gray-900 text-sm font-bold">
+                    {node.readings?.humidity != null ? `${node.readings.humidity}%` : 'N/A'}
+                  </strong>
                   <span className="text-[9px] text-gray-400 block">RH</span>
                 </div>
               </div>

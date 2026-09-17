@@ -90,32 +90,32 @@ class ConnectivityService:
                 }
             )
 
-        # Baseline response when no specific connectivity log entry is present
+        # Response when no specific connectivity log entry is present
         return ConnectivityCurrentResponse(
             farm_id=farm_id,
-            status="Connected",
-            signal="Good",
-            signal_strength_dbm=-78,
-            latency="18 ms",
-            latency_ms=18.0,
-            upload_speed="8.4 Mbps",
-            download_speed="24.6 Mbps",
-            uptime="7 days (99.8%)",
-            active_duration="7 days",
+            status="No Data",
+            signal="No Data",
+            signal_strength_dbm=0,
+            latency="N/A",
+            latency_ms=0.0,
+            upload_speed="N/A",
+            download_speed="N/A",
+            uptime="N/A",
+            active_duration="N/A",
             packet_statistics={
-                "packets_sent_24h": "124,532",
-                "packets_received_24h": "122,870",
-                "packet_success_rate": "98.7%",
-                "packet_loss_rate": "1.3%",
+                "packets_sent_24h": "0",
+                "packets_received_24h": "0",
+                "packet_success_rate": "N/A",
+                "packet_loss_rate": "N/A",
             },
             last_packet=datetime.now(timezone.utc),
             network_type="5G (NSA)",
-            carrier="Jio",
+            carrier="N/A",
             module_status={
-                "status": "Operational",
+                "status": "No Connectivity Data",
                 "firmware": "v2.3.1",
-                "temperature": "42°C",
-                "power_supply": "Stable (5.1 V)",
+                "temperature": "N/A",
+                "power_supply": "N/A",
                 "errors_24h": 0,
             }
         )
@@ -167,25 +167,8 @@ class ConnectivityService:
                     "latency": int(l.latency_ms)
                 })
         else:
-            # Provide standard baseline 24-hour sequence
-            times = ["12 AM", "4 AM", "8 AM", "12 PM", "4 PM", "8 PM"]
-            speeds = [(7.2, 22.0), (8.8, 26.4), (7.9, 24.1), (8.5, 25.8), (8.1, 23.9), (8.4, 24.6)]
-            latencies = [19, 17, 18, 20, 18, 18]
-
-            for i, (t, (up, down), lat) in enumerate(zip(times, speeds, latencies)):
-                speed_history.append({"time": t, "uplink": up, "downlink": down})
-                latency_history.append({"time": t, "latency": lat})
-                history_items.append(
-                    ConnectivityHistoryItem(
-                        timestamp=datetime.now(timezone.utc),
-                        status="connected",
-                        latency_ms=float(lat),
-                        uplink_mbps=up,
-                        downlink_mbps=down,
-                        rssi=-78,
-                        packet_loss_pct=1.3
-                    )
-                )
+            # Return empty history lists when no connectivity logs exist
+            pass
 
         return ConnectivityHistoryResponse(
             farm_id=farm_id,

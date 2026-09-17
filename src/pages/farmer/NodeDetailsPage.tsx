@@ -122,39 +122,44 @@ export const NodeDetailsPage: React.FC = () => {
   }
 
   // 10 channel resistance data for bar chart
-  const latestCycle = sensorHistory?.cycles?.[0] || sensorHistory?.latest_5_cycle_window?.[sensorHistory.latest_5_cycle_window.length - 1];
-  const gasReadings = latestCycle?.gas_readings || [145.2, 138.4, 124.6, 112.8, 98.4, 88.5, 76.2, 65.4, 52.1, 41.8];
+  const latestCycle = sensorHistory?.cycles?.[0] || sensorHistory?.latest_5_window?.[sensorHistory.latest_5_window.length - 1];
+  const gasReadings = latestCycle?.gas_readings || [];
 
-  const channelData = [
-    { channel: 'R1', value: gasReadings[0] || 145.2, type: 'Ethanol / Alcohol' },
-    { channel: 'R2', value: gasReadings[1] || 138.4, type: 'Terpenes' },
-    { channel: 'R3', value: gasReadings[2] || 124.6, type: 'Ammonia' },
-    { channel: 'R4', value: gasReadings[3] || 112.8, type: 'Carbon Monoxide' },
-    { channel: 'R5', value: gasReadings[4] || 98.4, type: 'Hydrocarbons' },
-    { channel: 'R6', value: gasReadings[5] || 88.5, type: 'Esters' },
-    { channel: 'R7', value: gasReadings[6] || 76.2, type: 'Sulfides' },
-    { channel: 'R8', value: gasReadings[7] || 65.4, type: 'Aldehydes' },
-    { channel: 'R9', value: gasReadings[8] || 52.1, type: 'Ketones' },
-    { channel: 'R10', value: gasReadings[9] || 41.8, type: 'BME688 MOS' },
+  const channelTypes = [
+    'Ethanol / Alcohol', 'Terpenes', 'Ammonia', 'Carbon Monoxide', 'Hydrocarbons',
+    'Esters', 'Sulfides', 'Aldehydes', 'Ketones', 'BME688 MOS'
   ];
 
-  const avgGasResistance = Math.round(
-    gasReadings.reduce((a: number, b: number) => a + b, 0) / gasReadings.length
-  );
+  const channelData = gasReadings.length === 10
+    ? gasReadings.map((val: number, idx: number) => ({
+        channel: `R${idx + 1}`,
+        value: val,
+        type: channelTypes[idx] || `Sensor R${idx + 1}`
+      }))
+    : [];
+
+  const avgGasResistance = gasReadings.length > 0
+    ? Math.round(gasReadings.reduce((a: number, b: number) => a + b, 0) / gasReadings.length)
+    : 0;
 
   // Transmission logs
-  const transmissionLogs = (sensorHistory?.cycles || []).slice(0, 5).map((c: any) => ({
-    time: c.cycle_timestamp ? new Date(c.cycle_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '06:42:15 AM',
-    voc: `${Math.round(c.gas_readings?.reduce((a: number, b: number) => a + b, 0) / (c.gas_readings?.length || 1) || 124.6)} kΩ`,
-    temp: `${c.temperature || 28.4} °C`,
-    humidity: `${c.humidity || 72}%`,
-    status: c.is_valid ? 'Success (5G)' : 'Check Ingest',
-  }));
+  const transmissionLogs = (sensorHistory?.cycles || []).slice(0, 5).map((c: any) => {
+    const avgVoc = c.gas_readings?.length
+      ? Math.round(c.gas_readings.reduce((a: number, b: number) => a + b, 0) / c.gas_readings.length)
+      : null;
+    return {
+      time: c.cycle_timestamp ? new Date(c.cycle_timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A',
+      voc: avgVoc != null ? `${avgVoc} kΩ` : 'N/A',
+      temp: c.temperature != null ? `${c.temperature} °C` : 'N/A',
+      humidity: c.humidity != null ? `${c.humidity}%` : 'N/A',
+      status: c.is_valid ? 'Success (5G)' : 'Check Ingest',
+    };
+  });
 
   // 5-Hour Window Readiness state
-  const isWindowReady = sensorHistory?.window_ready ?? true;
-  const availableCycles = sensorHistory?.available_cycles ?? 5;
-  const requiredCycles = sensorHistory?.required_cycles ?? 5;
+  const availableCycles = sensorHistory?.cycles_available ?? (sensorHistory?.cycles?.length || 0);
+  const requiredCycles = sensorHistory?.cycles_required ?? 5;
+  const isWindowReady = sensorHistory?.prediction_ready ?? (availableCycles >= 5);
   const latestPrediction = predictions[0];
 
   return (

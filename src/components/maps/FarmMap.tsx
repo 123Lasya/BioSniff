@@ -13,6 +13,7 @@ import {
 } from '@vis.gl/react-google-maps';
 import { FarmCoordinate, SensorNode } from '../../types';
 import { Layers, Maximize2, Navigation, Plus, Minus, AlertTriangle, Radio, Activity, CheckCircle2, RefreshCw } from 'lucide-react';
+import { checkTriangularArrangement } from '../../utils/geometry';
 
 interface FarmMapProps {
   center: FarmCoordinate;
@@ -240,6 +241,11 @@ export const FarmMap: React.FC<FarmMapProps> = ({
     return boundary.map(pt => ({ lat: pt.lat, lng: pt.lng }));
   }, [boundary]);
 
+  // Triangular Arrangement Check
+  const triangleCheck = useMemo(() => {
+    return checkTriangularArrangement(nodes);
+  }, [nodes]);
+
   return (
     <div
       className={`relative overflow-hidden rounded-2xl border border-gray-200/80 shadow-xs transition-all ${
@@ -247,6 +253,14 @@ export const FarmMap: React.FC<FarmMapProps> = ({
       } ${className}`}
       style={{ height: isFullscreen ? 'calc(100vh - 2rem)' : height }}
     >
+      {/* 3-Node Spatial Triangle Configuration Warning Banner */}
+      {triangleCheck.warningMessage && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 max-w-lg w-[90%] bg-amber-900/90 text-amber-100 backdrop-blur-md px-3.5 py-2 rounded-xl border border-amber-500/50 shadow-lg text-xs flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 animate-bounce" />
+          <span>{triangleCheck.warningMessage}</span>
+        </div>
+      )}
+
       <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
         <div className="h-full w-full relative bg-[#15231a]">
           <ApiLoadingNotice />

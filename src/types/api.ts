@@ -28,6 +28,40 @@ export interface UserOut {
   updated_at: string;
 }
 
+export interface UserRegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  role?: 'farmer' | 'admin';
+  full_name?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  state?: string | null;
+  district?: string | null;
+  profile_image_url?: string | null;
+  farm_name?: string | null;
+  crop?: string | null;
+  crop_variety?: string | null;
+  area?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  boundary_geojson?: string | null;
+}
+
+export interface FarmCreateRequest {
+  farm_name: string;
+  area: number;
+  crop: string;
+  crop_variety?: string | null;
+  growth_stage?: string | null;
+  address?: string | null;
+  latitude: number;
+  longitude: number;
+  boundary_geojson?: string | null;
+  status?: string;
+  farmer_id?: number | null;
+}
+
 export interface FarmerDashboardResponse {
   farmer: Record<string, any>;
   farm: Record<string, any>;

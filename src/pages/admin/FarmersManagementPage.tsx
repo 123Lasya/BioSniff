@@ -212,23 +212,30 @@ export const FarmersManagementPage: React.FC = () => {
                   const farmerIdNum = farmer.farmer_id || farmer.id || 1;
                   const name = farmer.full_name || farmer.name || 'Farmer';
                   const phone = farmer.phone || '+91 98220 12345';
-                  const email = farmer.email || 'farmer@biosniff.com';
-                  const district = farmer.district || 'Ahmednagar';
-                  const state = farmer.state || 'Maharashtra';
+                  const email = farmer.email || '-';
+                  const district = farmer.district || '';
+                  const state = farmer.state || '';
+                  const locationStr = [district, state].filter(Boolean).join(', ') || '-';
                   const crops = farmer.crops || ['Rice'];
-                  const farmsCount = farmer.farms_count || farmer.farmCount || 1;
-                  const totalArea = farmer.total_acres || farmer.totalAreaAcres || 4.6;
+                  const farmsCount = farmer.farms_count ?? farmer.farmCount ?? 0;
+                  const totalArea = farmer.total_acres ?? farmer.totalAreaAcres ?? 0;
                   const healthStatus = farmer.health_status || farmer.healthStatus || 'healthy';
 
                   return (
                     <tr key={farmerIdNum} className="hover:bg-gray-50/70 transition">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={farmer.avatarUrl || 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=200&q=80'}
-                            alt={name}
-                            className="w-9 h-9 rounded-full object-cover border border-emerald-200 shadow-xs"
-                          />
+                          {farmer.profile_image_url || farmer.avatarUrl ? (
+                            <img
+                              src={farmer.profile_image_url || farmer.avatarUrl}
+                              alt={name}
+                              className="w-9 h-9 rounded-full object-cover border border-emerald-200 shadow-xs"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs border border-emerald-300">
+                              {name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                           <div>
                             <strong className="text-gray-900 font-bold block">{name}</strong>
                             <span className="text-[10px] text-gray-400">FRM00{farmerIdNum}</span>

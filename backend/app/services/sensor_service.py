@@ -997,4 +997,56 @@ class SensorDataService:
             )
         return self.recommendation_service.get_farm_recommendations(farm.farm_id, limit=limit)
 
+    def check_overdue_nodes(self, farm_id_input: Optional[Union[int, str]] = None) -> List[Dict[str, Any]]:
+        """
+        Persistent database-driven hourly missing node monitoring.
+        Checks registered nodes for expected hourly sensor cycles.
+        If a node cycle is overdue (>3600 seconds or absent), creates a persistent alert.
+        Prevents duplicate alert spam via AlertService deduplication.
+        """
+        farm_id = None
+        if farm_id_input is not None:
+            farm = self.resolve_farm(farm_id_input)
+            if farm:
+                farm_id = farm.farm_id
+
+        if farm_id is not None:
+            nodes = self.node_repo.get_by_farm_id(farm_id)
+        else:
+            nodes = self.db.query(Node).all()
+
+        overdue_alerts: List[Dict[str, Any]] = []
+        now = datetime.now(timezone.utc)
+
+        for node in nodes:
+            latest_cycle = self.sensor_cycle_repo.get_latest_cycle_for_node(node.node_id)
+            is_overdue = False
+            if not latest_cycle:
+                is_overdue = True
+            else:
+                cycle_time = latest_cycle.cycle_timestamp
+                if cycle_time.tzinfo is None:
+                    cycle_time = cycle_time.replace(tzinfo=timezone.utc)
+                diff_seconds = (now - cycle_time).total_seconds()
+                if diff_seconds > 3600.0:
+                    is_overdue = True
+
+            if is_overdue:
+                # Update node status in DB
+                node.status = "offline"
+                self.db.commit()
+
+                # Create farmer alert with explicit required message text
+                alert = self.alert_service.create_alert(
+                    farm_id=node.farm_id,
+                    node_id=node.node_id,
+                    alert_type=AlertType.NODE_NO_DATA.value,
+                    severity="warning",
+                    title=f"Node {node.node_id} Sensor Data Overdue",
+                    message=f"Node {node.node_id} has not reported sensor data for the expected hourly interval. Please check the node, power supply, connectivity, or hardware."
+                )
+                overdue_alerts.append(self.alert_service._format_alert(alert))
+
+        return overdue_alerts
+
 

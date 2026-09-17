@@ -67,21 +67,13 @@ export const Connectivity5GPage: React.FC = () => {
           const dt = new Date(l.recorded_at);
           return {
             time: dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            upload: l.uplink_mbps || 8.4,
-            download: l.downlink_mbps || 24.6,
+            upload: l.uplink_mbps || 0,
+            download: l.downlink_mbps || 0,
           };
         });
         setHistory(points);
       } else {
-        setHistory([
-          { time: '09:30', upload: 8.2, download: 24.5 },
-          { time: '09:40', upload: 8.6, download: 27.8 },
-          { time: '09:50', upload: 8.4, download: 26.9 },
-          { time: '10:00', upload: 8.7, download: 25.8 },
-          { time: '10:10', upload: 7.8, download: 26.2 },
-          { time: '10:20', upload: 8.4, download: 27.3 },
-          { time: '10:30', upload: 8.4, download: 29.2 },
-        ]);
+        setHistory([]);
       }
     } catch (err: any) {
       console.error('Failed to fetch connectivity:', err);

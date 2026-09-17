@@ -121,15 +121,21 @@ export const FarmerProfilePage: React.FC = () => {
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-xs">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <img
-              src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=200&q=80"
-              alt={details.full_name || 'Farmer'}
-              className="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-500 shadow-md"
-            />
+            {details.profile_image_url ? (
+              <img
+                src={details.profile_image_url}
+                alt={details.full_name || 'Farmer'}
+                className="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-500 shadow-md"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-2xl bg-emerald-100 text-emerald-900 border-2 border-emerald-500 flex items-center justify-center font-bold text-2xl shadow-md">
+                {(details.full_name || details.username || 'F').charAt(0).toUpperCase()}
+              </div>
+            )}
             <div className="space-y-1.5">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 font-serif-display">
-                  {details.full_name || 'Ramesh Patil'}
+                  {details.full_name || details.username || 'Farmer'}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
                   FRM00{details.farmer_id || farmerIdNum}
@@ -138,15 +144,15 @@ export const FarmerProfilePage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{details.address || `${details.district || 'Ahmednagar'}, ${details.state || 'Maharashtra'}`}</span>
+                  <span>{details.address || `${details.district || ''}, ${details.state || ''}`.replace(/^,\s*/, '') || 'Location Not Set'}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <Phone className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{details.phone || '+91 98220 12345'}</span>
+                  <span>{details.phone || 'No Phone Registered'}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <Mail className="w-3.5 h-3.5 text-gray-400" />
-                  <span>{details.email || 'farmer@biosniff.com'}</span>
+                  <span>{details.email || '-'}</span>
                 </span>
               </div>
             </div>
