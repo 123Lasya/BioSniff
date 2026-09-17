@@ -1,0 +1,29 @@
+cd backend
+backend\.venv\Scripts\Activate.ps1
+eep both terminals running
+
+Terminal 1 — Backend
+
+C:\Users\m4827\Downloads\BioSniff\backend
+(.venv)
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+Backend:
+
+http://localhost:8000
+
+Terminal 2 — Frontend
+
+C:\Users\m4827\Downloads\BioSniff
+npm run dev
+
+Frontend:
+
+http://localhost:3000
+
+or whatever Vite prints.
+
+
+
+
+
