@@ -7,7 +7,9 @@ from app.schemas.admin import (
     AdminFarmMapItem,
     AdminFarmersListResponse,
     AdminFarmerProfileResponse,
+    AdminNodeListItem,
 )
+
 from app.services.admin_service import AdminService
 from app.api.deps import get_current_admin
 from app.models.user import User
@@ -90,3 +92,17 @@ def get_admin_farmer_profile(
     """
     service = AdminService(db)
     return service.get_farmer_profile(farmer_id=farmer_id)
+
+
+@router.get("/nodes", response_model=List[AdminNodeListItem], summary="Get list of all sensor nodes across all farms for admin")
+def get_admin_nodes(
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns list of all deployed hardware nodes across all farms with farm, farmer, signal, battery,
+    and latest telemetry readings.
+    """
+    service = AdminService(db)
+    return service.get_all_nodes()
+

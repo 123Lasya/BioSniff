@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Home,
   Users,
+  Cpu,
+  Sliders,
   LogOut,
 } from 'lucide-react';
 import { BioSniffLogo } from './BioSniffLogo';
@@ -15,7 +17,10 @@ export const AdminSidebar: React.FC = () => {
   const navItems = [
     { name: 'Overview', to: '/admin/overview', icon: Home },
     { name: 'Farmers', to: '/admin/farmers', icon: Users },
+    { name: 'Sensor Nodes', to: '/admin/sensors', icon: Cpu },
+    { name: 'System Settings', to: '/admin/settings', icon: Sliders },
   ];
+
 
   const handleLogout = () => {
     logout();

@@ -65,3 +65,28 @@ class AdminFarmerProfileResponse(BaseModel):
     advisories: List[Dict[str, Any]] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AdminNodeListItem(BaseModel):
+    node_id: str
+    node_name: str
+    farm_id: int
+    farm_name: str
+    farmer_id: int
+    farmer_name: str
+    latitude: float
+    longitude: float
+    status: str
+    battery_percentage: Optional[float] = None
+    signal_strength: Optional[int] = None
+    firmware_version: Optional[str] = None
+    is_master: bool = False
+    last_seen: Optional[str] = None
+    latest_temperature: Optional[float] = None
+    latest_humidity: Optional[float] = None
+    latest_pressure: Optional[float] = None
+    latest_voc: Optional[float] = None
+    latest_prediction: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+

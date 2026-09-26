@@ -3,7 +3,8 @@ import {
   AdminDashboardResponse,
   AdminFarmMapItem,
   AdminFarmersListResponse,
-  AdminFarmerProfileResponse
+  AdminFarmerProfileResponse,
+  AdminNodeListItem
 } from '../types/api';
 
 export interface AdminFarmersFilterParams {
@@ -44,5 +45,10 @@ export const adminService = {
 
   async getFarmerProfile(farmerId: number): Promise<AdminFarmerProfileResponse> {
     return apiClient.get<AdminFarmerProfileResponse>(`/admin/farmers/${farmerId}`);
+  },
+
+  async getNodes(): Promise<AdminNodeListItem[]> {
+    return apiClient.get<AdminNodeListItem[]>('/admin/nodes');
   }
 };
+

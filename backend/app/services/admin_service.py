@@ -14,13 +14,15 @@ from app.models.recommendation import Recommendation
 from app.models.alert import Alert
 from app.models.activity import ActivityLog
 from app.models.connectivity import ConnectivityLog
-from app.models.environment import EnvironmentReading
+from app.models.sensor_cycle import SensorCycle
 from app.schemas.admin import (
     AdminDashboardResponse,
     AdminFarmMapItem,
     AdminFarmersListResponse,
     AdminFarmerProfileResponse,
+    AdminNodeListItem,
 )
+
 
 
 class AdminService:
@@ -471,3 +473,55 @@ class AdminService:
             history_summaries=[],
             advisories=advisories
         )
+
+    def get_all_nodes(self) -> List[AdminNodeListItem]:
+        nodes = self.db.query(Node).order_by(Node.node_id.asc()).all()
+        items = []
+        for n in nodes:
+            farm = n.farm
+            farmer = farm.farmer if farm else None
+
+            # Latest sensor cycle
+            latest_cycle = (
+                self.db.query(SensorCycle)
+                .filter(SensorCycle.node_id == n.node_id)
+                .order_by(desc(SensorCycle.cycle_timestamp))
+                .first()
+            )
+
+            # Latest prediction
+            latest_pred = (
+                self.db.query(Prediction)
+                .filter(Prediction.node_id == n.node_id)
+                .order_by(desc(Prediction.timestamp))
+                .first()
+            )
+
+            gas10 = latest_cycle.gas_readings if (latest_cycle and latest_cycle.gas_readings) else None
+            latest_voc = round(sum(gas10[:3]) / 3.0, 1) if (gas10 and len(gas10) >= 3) else None
+
+            items.append(
+                AdminNodeListItem(
+                    node_id=n.node_id,
+                    node_name=n.node_name,
+                    farm_id=n.farm_id,
+                    farm_name=farm.farm_name if farm else "Unassigned Farm",
+                    farmer_id=farmer.farmer_id if farmer else 0,
+                    farmer_name=farmer.full_name if farmer else "Unknown Farmer",
+                    latitude=n.latitude,
+                    longitude=n.longitude,
+                    status=n.status,
+                    battery_percentage=round(n.battery_percentage, 1) if n.battery_percentage is not None else None,
+                    signal_strength=n.signal_strength,
+                    firmware_version=n.firmware_version,
+                    is_master=n.is_master,
+                    last_seen=n.last_seen.strftime("%d %b %Y, %I:%M %p") if n.last_seen else None,
+                    latest_temperature=round(latest_cycle.temperature, 1) if (latest_cycle and latest_cycle.temperature is not None) else None,
+                    latest_humidity=round(latest_cycle.humidity, 1) if (latest_cycle and latest_cycle.humidity is not None) else None,
+                    latest_pressure=round(latest_cycle.pressure, 1) if (latest_cycle and latest_cycle.pressure is not None) else None,
+                    latest_voc=latest_voc,
+                    latest_prediction=latest_pred.predicted_class if latest_pred else None,
+                )
+            )
+        return items
+

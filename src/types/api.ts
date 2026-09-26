@@ -292,3 +292,26 @@ export interface AdminFarmerProfileResponse {
   history_summaries: Record<string, any>[];
   advisories: Record<string, any>[];
 }
+
+export interface AdminNodeListItem {
+  node_id: string;
+  node_name: string;
+  farm_id: number;
+  farm_name: string;
+  farmer_id: number;
+  farmer_name: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  battery_percentage: number | null;
+  signal_strength: number | null;
+  firmware_version: string | null;
+  is_master: boolean;
+  last_seen: string | null;
+  latest_temperature: number | null;
+  latest_humidity: number | null;
+  latest_pressure: number | null;
+  latest_voc: number | null;
+  latest_prediction: string | null;
+}
+

@@ -224,7 +224,7 @@ export const LandingPage: React.FC = () => {
                   <div className="text-sm font-semibold">124.6 kΩ (Stable Normal)</div>
                 </div>
                 <Link
-                  to="/farmer/inspect"
+                  to="/farmer/system"
                   className="px-3.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-xs font-semibold text-white transition"
                 >
                   View Details

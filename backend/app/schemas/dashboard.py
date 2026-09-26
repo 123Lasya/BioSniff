@@ -17,29 +17,24 @@ class FarmerDashboardResponse(BaseModel):
     farm_boundary: List[Coordinates] = Field(default_factory=list)
     health_status: str  # healthy, diseased, at-risk, inactive
     latest_node_states: List[Dict[str, Any]] = Field(default_factory=list)
-    battery: float
-    signal: str
+    battery: Optional[float] = None
+    signal: Optional[str] = None
     latest_prediction: Optional[Dict[str, Any]] = None
-    confidence: float
+    confidence: Optional[float] = None
     all_node_predictions: List[Dict[str, Any]] = Field(default_factory=list)
     detected_diseases: List[str] = Field(default_factory=list)
     disease_status: Optional[str] = "Healthy"
     localization: Optional[Dict[str, Any]] = None
     affected_zone: Optional[Dict[str, Any]] = None
     localized_source: Optional[Dict[str, Any]] = None
-    wind: Dict[str, Any] = Field(
-        default_factory=lambda: {
-            "speed": 0.0,
-            "direction": "NE (48°)",
-            "angle": 48.0,
-        }
-    )
-    wind_speed: float = 0.0
-    wind_direction: str = "NE (48°)"
-    temperature: float
-    humidity: float
-    pressure: float
-    soil_moisture: float = 68.0
+    wind: Optional[Dict[str, Any]] = None
+    wind_speed: Optional[float] = None
+    wind_direction: Optional[str] = None
+    temperature: Optional[float] = None
+    humidity: Optional[float] = None
+    pressure: Optional[float] = None
+    soil_moisture: Optional[float] = None
+
     weather_summary: Optional[Dict[str, Any]] = None
     alerts_summary: Optional[Dict[str, Any]] = None
     latest_recommendation: Optional[Dict[str, Any]] = None

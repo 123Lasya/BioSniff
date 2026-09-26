@@ -171,7 +171,7 @@ export const InspectBioSniffPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900">{dashboard.temperature}</span>
+            <span className="text-2xl font-bold text-gray-900">{dashboard.temperature != null ? dashboard.temperature : 'N/A'}</span>
             <span className="text-xs font-medium text-gray-500">°C</span>
           </div>
           <p className="text-[11px] text-gray-500">
@@ -187,7 +187,7 @@ export const InspectBioSniffPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900">{dashboard.humidity}</span>
+            <span className="text-2xl font-bold text-gray-900">{dashboard.humidity != null ? dashboard.humidity : 'N/A'}</span>
             <span className="text-xs font-medium text-gray-500">%</span>
           </div>
           <p className="text-[11px] text-emerald-700 font-medium">
@@ -203,13 +203,14 @@ export const InspectBioSniffPage: React.FC = () => {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900">{dashboard.pressure}</span>
+            <span className="text-2xl font-bold text-gray-900">{dashboard.pressure != null ? dashboard.pressure : 'N/A'}</span>
             <span className="text-xs font-medium text-gray-500">hPa</span>
           </div>
           <p className="text-[11px] text-gray-500">
             Stable micro-front
           </p>
         </div>
+
       </div>
 
       {/* Chart 2: Diurnal Microclimate (Temperature vs Humidity) */}

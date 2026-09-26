@@ -26,6 +26,8 @@ import { AdminDashboardLayout } from './pages/admin/AdminDashboardLayout';
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
 import { FarmersManagementPage } from './pages/admin/FarmersManagementPage';
 import { FarmerProfilePage } from './pages/admin/FarmerProfilePage';
+import { AdminNodesPage } from './pages/admin/AdminNodesPage';
+import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 
 export default function App() {
   return (
@@ -84,9 +86,9 @@ export default function App() {
             <Route path="farmer/:id" element={<FarmerProfilePage />} />
             <Route path="farms" element={<AdminOverviewPage />} />
             <Route path="analytics" element={<AdminOverviewPage />} />
-            <Route path="sensors" element={<NodesPage />} />
+            <Route path="sensors" element={<AdminNodesPage />} />
             <Route path="alerts" element={<AdminOverviewPage />} />
-            <Route path="settings" element={<FarmConfigPage />} />
+            <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
 
           {/* Catch-all */}
@@ -96,4 +98,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
