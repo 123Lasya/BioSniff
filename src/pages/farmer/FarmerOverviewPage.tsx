@@ -16,6 +16,8 @@ import { useAuth } from '../../context/AuthContext';
 import { dashboardService } from '../../services/dashboardService';
 import { FarmerDashboardResponse } from '../../types/api';
 import { SensorNode, FarmCoordinate } from '../../types';
+import healthyFoliageImg from '../../assets/images/healthy_foliage_reference.png';
+import diseasedSymptomImg from '../../assets/images/diseased_foliar_symptom_reference.png';
 
 export const FarmerOverviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -322,11 +324,11 @@ export const FarmerOverviewPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-red-100/70 border border-red-200 shadow-xs">
+                    <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-red-100/70 border border-red-200 shadow-xs hover:border-red-300 transition-colors">
                       <img
-                        src="https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&w=300&q=80"
-                        alt="Rice Blast Leaf Pathology Symptom"
-                        className="w-20 h-16 sm:w-24 sm:h-16 rounded-xl object-cover border border-red-200 shrink-0"
+                        src={diseasedSymptomImg}
+                        alt="Diseased Crop Foliar Lesion Symptom Reference"
+                        className="w-20 h-16 sm:w-24 sm:h-16 rounded-xl object-cover border border-red-200 shrink-0 shadow-xs"
                       />
                       <div className="text-xs space-y-0.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-red-800">
@@ -372,11 +374,11 @@ export const FarmerOverviewPage: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-white border border-emerald-200 shadow-xs">
+                    <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-white border border-emerald-200 shadow-xs hover:border-emerald-300 transition-colors">
                       <img
-                        src="https://images.unsplash.com/photo-1536816579748-4ecb3f03d72a?auto=format&fit=crop&w=300&q=80"
-                        alt="Healthy Crop Foliage"
-                        className="w-20 h-16 sm:w-24 sm:h-16 rounded-xl object-cover border border-emerald-100 shrink-0"
+                        src={healthyFoliageImg}
+                        alt="Healthy Crop Foliage Visual Reference"
+                        className="w-20 h-16 sm:w-24 sm:h-16 rounded-xl object-cover border border-emerald-100 shrink-0 shadow-xs"
                       />
                       <div className="text-xs space-y-0.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
